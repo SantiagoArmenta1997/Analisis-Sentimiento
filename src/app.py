@@ -1,43 +1,34 @@
 import streamlit as st
-import pyodbc
 import pandas as pd
-import matplotlib.pyplot as plt
+from sqlalchemy import create_engine
 
-# Configuración de la página
-st.set_page_config(page_title="Sentiment Analysis Dashboard", layout="wide")
-st.title("📊 Dashboard de Sentimiento de Noticias")
+engine = create_engine("mssql+pyodbc://localhost/PortfolioProjects?driver=ODBC+Driver+17+for+SQL+Server&trusted_connection=yes")
 
-# Conexión a SQL Server
-def get_data():
-    conn_str = (
-        r'DRIVER={ODBC Driver 17 for SQL Server};'
-        r'SERVER=localhost;'
-        r'DATABASE=PortfolioProjects;'
-        r'Trusted_Connection=yes;'
-    )
-    conn = pyodbc.connect(conn_str)
-    query = "SELECT * FROM ProcessedNews"
-    df = pd.read_sql(query, conn)
-    conn.close()
-    return df
+st.set_page_config(layout="wide") # Importante para que quepan las 3 tablas
+st.title("⚽ Central de Inteligencia de Fútbol")
 
-df = get_data()
+# Selector
+liga_cod = st.selectbox("Seleccionar Liga", ["PL", "PD", "BL1"], 
+                         format_func=lambda x: {"PL": "Premier League", "PD": "La Liga", "BL1": "Bundesliga"}[x])
 
-# --- Layout de Streamlit ---
-col1, col2 = st.columns(2)
+# Carga de datos
+df_pos = pd.read_sql(f"SELECT * FROM LeagueStandings WHERE league='{liga_cod}'", engine)
+df_gol = pd.read_sql(f"SELECT * FROM LeagueScorers WHERE league='{liga_cod}'", engine)
+df_ast = pd.read_sql(f"SELECT * FROM LeagueAssists WHERE league='{liga_cod}'", engine)
 
-with col1:
-    st.subheader("Distribución de Sentimientos")
-    sentiment_counts = df['sentiment_label'].value_counts()
-    st.bar_chart(sentiment_counts)
+# Renderizado en 3 columnas
+c1, c2, c3 = st.columns(3)
 
-with col2:
-    st.subheader("Métricas Clave")
-    avg_score = df['sentiment_score'].mean()
-    st.metric("Score Promedio", f"{avg_score:.2f}")
-    st.write("Un score cercano a 1 es muy positivo, cercano a -1 es muy negativo.")
+with c1:
+    st.subheader("🏆 Posiciones (Top 3)")
+    if not df_pos.empty:
+        df_pos['form'] = df_pos['form'].str.replace('W','✅').str.replace('L','❌').str.replace('D','➖').str.replace(',','')
+        st.dataframe(df_pos[['team', 'points', 'gd', 'form']], hide_index=True)
 
-st.divider()
+with c2:
+    st.subheader("🎯 Máximos Goleadores")
+    st.dataframe(df_gol[['player', 'goals', 'team']], hide_index=True)
 
-st.subheader("Detalle de las Noticias")
-st.dataframe(df[['title', 'sentiment_label', 'sentiment_score']], width='stretch')
+with c3:
+    st.subheader("🅰️ Máximos Asistidores")
+    st.dataframe(df_ast[['player', 'assists', 'team']], hide_index=True)

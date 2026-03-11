@@ -12,21 +12,19 @@ conn_str = (
 
 def process_sentiment():
     conn = pyodbc.connect(conn_str)
+    cursor = conn.cursor()
     
-    # 1. Leer datos de SQL
-    query = "SELECT id, title FROM RawNews"
+    # 1. Leer datos de la tabla de Fútbol
+    query = "SELECT id, title FROM RawFootballNews"
     df = pd.read_sql(query, conn)
     
-    # 2. Inicializar analizador de sentimiento
+    # 2. Inicializar analizador
     analyzer = SentimentIntensityAnalyzer()
-    
     results = []
     
     for index, row in df.iterrows():
-        # Analizar el título (suele ser más preciso que el contenido cortado de la API)
         score = analyzer.polarity_scores(row['title'])['compound']
         
-        # Clasificar
         if score >= 0.05:
             label = 'Positivo'
         elif score <= -0.05:
@@ -36,15 +34,18 @@ def process_sentiment():
             
         results.append((row['id'], row['title'], score, label))
     
-    # 3. Guardar resultados en la nueva tabla
-    cursor = conn.cursor()
+    # 3. Limpiar tabla de destino para evitar errores de ID duplicado (Truncate)
+    # Esto asegura que tu dashboard siempre tenga la versión más fresca
+    cursor.execute("TRUNCATE TABLE ProcessedFootballSentiment")
+    
+    # 4. Guardar resultados en la tabla correcta
     cursor.executemany("""
-        INSERT INTO ProcessedNews (id, title, sentiment_score, sentiment_label)
+        INSERT INTO ProcessedFootballSentiment (id, title, sentiment_score, sentiment_label)
         VALUES (?, ?, ?, ?)
     """, results)
     
     conn.commit()
-    print(f"Procesamiento completado: {len(results)} filas analizadas.")
+    print(f"⚽ Procesamiento de Fútbol completado: {len(results)} filas analizadas.")
     
     cursor.close()
     conn.close()

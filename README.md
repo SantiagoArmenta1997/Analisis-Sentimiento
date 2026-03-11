@@ -1,24 +1,31 @@
-# 📊 Análisis de Sentimiento de Noticias con SQL Server & NLP
+# ⚽ Football News Sentiment Analysis Pipeline
 
-Este proyecto es un pipeline de datos completo (ETL) que extrae noticias globales, las almacena en una base de datos relacional, procesa el sentimiento del texto mediante Inteligencia Artificial y visualiza los resultados en un dashboard interactivo.
+Este proyecto es un pipeline de datos (ETL) automatizado que extrae noticias de fútbol en tiempo real, realiza un análisis de sentimiento utilizando Procesamiento de Lenguaje Natural (NLP) y visualiza los resultados en un dashboard interactivo.
+
+
+
+## 🚀 Características Principales
+
+* **Ingesta Automatizada:** Extracción de noticias mediante NewsAPI con carga directa a **SQL Server**.
+* **Análisis de Sentimiento:** Procesamiento con la librería **VADER** para clasificar el tono de la prensa deportiva (Positivo, Negativo, Neutral).
+* **Orquestación:** Script maestro (`main.py`) que gestiona el flujo de ejecución y manejo de rutas absolutas.
+* **Dashboard BI:** Visualización dinámica construida en **Streamlit** con métricas clave de sentimiento.
 
 ## 🛠️ Tecnologías Utilizadas
-* **Lenguaje:** Python 3.x
-* **Base de Datos:** SQL Server (T-SQL)
-* **Librerías de Datos:** Pandas, PyODBC, SQLAlchemy
-* **NLP:** VADER Sentiment Analysis / Hugging Face
-* **Visualización:** Streamlit
 
-## 🏗️ Arquitectura del Proyecto
-1. **Ingesta:** Script en Python que consume la API de NewsAPI y carga los datos crudos en **SQL Server**.
-2. **Procesamiento:** Script de limpieza y análisis de sentimiento que lee desde SQL y actualiza las métricas en una tabla de resultados.
-3. **Consumo:** Dashboard en **Streamlit** que se conecta en tiempo real a SQL Server para mostrar KPIs y distribución de sentimientos.
+* **Lenguaje:** Python 3.11+
+* **Base de Datos:** Microsoft SQL Server (T-SQL)
+* **Librerías:** Pandas, SQLAlchemy, PyODBC, VaderSentiment, Streamlit, Requests.
+* **Entorno:** VS Code & Anaconda.
 
-## 🚀 Cómo ejecutar
-1. Clonar el repositorio.
-2. Configurar la base de datos con el script SQL adjunto.
-3. Instalar dependencias: `pip install -r requirements.txt`
-4. Ejecutar el dashboard: `streamlit run app.py`
+## 📁 Estructura del Proyecto
 
----
-*Proyecto desarrollado por Santiago Armenta - Ingeniero de Datos / Data Scientist*
+```text
+Proyecto-Analisis-Sentimiento/
+├── main.py                # Orquestador principal (Entry point)
+├── requirements.txt       # Dependencias del proyecto
+├── .gitignore             # Archivos excluidos (Credenciales, __pycache__)
+└── src/                   # Código fuente
+    ├── Ingesta.py         # Extracción de API a SQL
+    ├── Procesar.py        # Análisis de sentimiento y actualización de SQL
+    └── app.py             # Dashboard de Streamlit
