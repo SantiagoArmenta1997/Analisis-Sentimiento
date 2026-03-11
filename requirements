@@ -1,6 +1,6 @@
+streamlit
 pandas
+sqlalchemy
 pyodbc
 requests
-vaderSentiment
-streamlit
-matplotlib
+nltk

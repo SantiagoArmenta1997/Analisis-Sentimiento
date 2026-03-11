@@ -49,19 +49,34 @@ try:
             )
 
     with c2:
-        st.subheader("🎯 Top Scorers")
-        if not df_gol.empty:
-            st.dataframe(df_gol[['player', 'goals', 'team']], hide_index=True)
-        else:
-            st.info("No hay datos de goleadores.")
+            st.subheader("🎯 Top Scorers")
+            if not df_gol.empty:
+                st.dataframe(
+                    df_gol[['player', 'goals', 'team']], 
+                    hide_index=True,
+                    column_config={
+                        "player": "Player",
+                        "goals": "Goals",
+                        "team": "Club"
+                    }
+                )
+            else:
+                st.info("No hay datos de goleadores.")
 
     with c3:
         st.subheader("🅰️ Top Assists")
         if not df_ast.empty:
-            st.dataframe(df_ast[['player', 'assists', 'team']], hide_index=True)
+            st.dataframe(
+                df_ast[['player', 'assists', 'team']], 
+                hide_index=True,
+                column_config={
+                    "player": "Player",
+                    "assists": "Assists",
+                    "team": "Club"
+                }
+            )
         else:
             st.info("No hay datos de asistencias.")
-
 except Exception as e:
     st.error(f"Error de conexión o de tabla: {e}")
     st.warning("Asegúrate de haber ejecutado 'python src/Ingesta_Stats.py' primero.")

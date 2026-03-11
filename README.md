@@ -1,31 +1,26 @@
-# ⚽ Football News Sentiment Analysis Pipeline
+# ⚽ Football Intelligence & Sentiment Analysis Pipeline
 
-Este proyecto es un pipeline de datos (ETL) automatizado que extrae noticias de fútbol en tiempo real, realiza un análisis de sentimiento utilizando Procesamiento de Lenguaje Natural (NLP) y visualiza los resultados en un dashboard interactivo.
+![Python](https://img.shields.io/badge/Python-3.10+-blue.svg) ![SQL Server](https://img.shields.io/badge/SQL_Server-2019+-red.svg) ![Streamlit](https://img.shields.io/badge/Streamlit-1.30+-orange.svg)
+
+Este proyecto es un **Pipeline de Datos End-to-End** diseñado para integrar información subjetiva (sentimiento de prensa) con datos objetivos (estadísticas reales de liga). Automatiza la extracción, limpieza, almacenamiento y visualización de datos de las principales ligas europeas: **Premier League, La Liga y Bundesliga.**
 
 
 
-## 🚀 Características Principales
+## 🚀 Funcionalidades
+* **Ingesta Multi-Fuente:** Extracción de noticias vía `NewsAPI` y estadísticas deportivas vía `Football-Data.org`.
+* **Arquitectura SQL Server:** Almacenamiento robusto en tablas relacionales (`LeagueStandings`, `LeagueScorers`, `LeagueAssists`).
+* **Análisis de Sentimiento (NLP):** Uso de la librería `VADER` para clasificar el impacto de las noticias en el entorno futbolístico.
+* **Dashboard Interactivo:** Interfaz en **Streamlit** con filtros dinámicos por liga y visualización en tres columnas (Posiciones, Goleadores, Asistidores).
+* **Data Enrichment:** Lógica programada para manejar limitaciones de APIs y asegurar la integridad visual del dashboard.
 
-* **Ingesta Automatizada:** Extracción de noticias mediante NewsAPI con carga directa a **SQL Server**.
-* **Análisis de Sentimiento:** Procesamiento con la librería **VADER** para clasificar el tono de la prensa deportiva (Positivo, Negativo, Neutral).
-* **Orquestación:** Script maestro (`main.py`) que gestiona el flujo de ejecución y manejo de rutas absolutas.
-* **Dashboard BI:** Visualización dinámica construida en **Streamlit** con métricas clave de sentimiento.
-
-## 🛠️ Tecnologías Utilizadas
-
-* **Lenguaje:** Python 3.11+
-* **Base de Datos:** Microsoft SQL Server (T-SQL)
-* **Librerías:** Pandas, SQLAlchemy, PyODBC, VaderSentiment, Streamlit, Requests.
-* **Entorno:** VS Code & Anaconda.
-
-## 📁 Estructura del Proyecto
+## 🏗️ Estructura del Proyecto
 
 ```text
-Proyecto-Analisis-Sentimiento/
-├── main.py                # Orquestador principal (Entry point)
-├── requirements.txt       # Dependencias del proyecto
-├── .gitignore             # Archivos excluidos (Credenciales, __pycache__)
-└── src/                   # Código fuente
-    ├── Ingesta.py         # Extracción de API a SQL
-    ├── Procesar.py        # Análisis de sentimiento y actualización de SQL
-    └── app.py             # Dashboard de Streamlit
+├── src/
+│   ├── Ingesta.py          # Extracción de noticias (NewsAPI)
+│   ├── Ingesta_Stats.py    # Extracción de estadísticas (Football-Data API)
+│   ├── Procesar.py         # Lógica de NLP y Sentimiento
+│   └── app.py              # Dashboard de Streamlit
+├── main.py                 # Orquestador principal del pipeline
+├── requirements.txt        # Dependencias del proyecto
+└── README.md
