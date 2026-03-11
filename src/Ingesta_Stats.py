@@ -1,40 +1,53 @@
 import requests
 import pandas as pd
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 
-# CONFIGURACIÓN
-API_KEY = 'fd266916f21e472b809fcebca03aba8a' 
+# ==========================================================
+# CONFIGURACIÓN DE USUARIO - INGRESA TU INFORMACIÓN AQUÍ
+# ==========================================================
+API_KEY = 'TU_API_KEY_AQUÍ'  # Obtén una gratis en https://www.football-data.org/
+SERVER = 'localhost'         # Tu servidor de SQL Server (ej. localhost o nombre de instancia)
+DATABASE = 'PortfolioProjects'
+# ==========================================================
+
 HEADERS = {'X-Auth-Token': API_KEY}
 LEAGUES = {'PL': 'Premier League', 'PD': 'La Liga', 'BL1': 'Bundesliga'}
 
-engine = create_engine("mssql+pyodbc://localhost/PortfolioProjects?driver=ODBC+Driver+17+for+SQL+Server&trusted_connection=yes")
+# Conexión a SQL Server usando Autenticación de Windows
+engine = create_engine(f"mssql+pyodbc://{SERVER}/{DATABASE}?driver=ODBC+Driver+17+for+SQL+Server&trusted_connection=yes")
 
 def get_league_data(league_code):
-    # 1. Posiciones
+    """Consulta la API para obtener posiciones y goleadores de una liga específica."""
+    
+    # 1. Obtener Tabla de Posiciones
     url_standings = f"https://api.football-data.org/v2/competitions/{league_code}/standings"
-    res = requests.get(url_standings, headers=HEADERS).json()
+    res_s = requests.get(url_standings, headers=HEADERS).json()
     standings = []
-    if 'standings' in res:
-        for team in res['standings'][0]['table'][:3]:
+    if 'standings' in res_s:
+        for team in res_s['standings'][0]['table'][:3]: # Top 3 equipos
             standings.append({
-                'league': league_code, 'team': team['team']['name'],
-                'played': team['playedGames'], 'gd': team['goalDifference'],
-                'points': team['points'], 'form': team.get('form', 'N/A')
+                'league': league_code,
+                'team': team['team']['name'],
+                'played': team['playedGames'],
+                'gd': team['goalDifference'],
+                'points': team['points'],
+                'form': team.get('form', 'N/A')
             })
 
-    # 2. Goleadores
+    # 2. Obtener Máximos Goleadores
     url_scorers = f"https://api.football-data.org/v2/competitions/{league_code}/scorers"
-    res_s = requests.get(url_scorers, headers=HEADERS).json()
+    res_sc = requests.get(url_scorers, headers=HEADERS).json()
     scorers = []
-    if 'scorers' in res_s:
-        for s in res_s['scorers'][:3]:
+    if 'scorers' in res_sc:
+        for s in res_sc['scorers'][:3]: # Top 3 goleadores
             scorers.append({
-                'league': league_code, 'player': s['player']['name'],
-                'team': s['team']['name'], 'goals': s['numberOfGoals']
+                'league': league_code,
+                'player': s['player']['name'],
+                'team': s['team']['name'],
+                'goals': s['numberOfGoals']
             })
             
-    # 3. Asistidores (Data Enrichment Manual por limitación de API Free)
-    # Como la API Free no da asistencias, inyectamos los líderes actuales para que el dashboard brille
+    # 3. Datos de Asistidores (Enriquecimiento manual debido a limitaciones de API gratuita)
     assists_map = {
         'PL': [{'player': 'Mohamed Salah', 'team': 'Liverpool', 'assists': 10}, {'player': 'Cole Palmer', 'team': 'Chelsea', 'assists': 9}],
         'PD': [{'player': 'Lamine Yamal', 'team': 'Barcelona', 'assists': 8}, {'player': 'Raphinha', 'team': 'Barcelona', 'assists': 7}],
@@ -45,16 +58,21 @@ def get_league_data(league_code):
     return standings, scorers, assists
 
 def run_ingesta():
-    all_s, all_sc, all_as = [], [], []
-    for code in LEAGUES.keys():
-        s, sc, a = get_league_data(code)
-        all_s.extend(s); all_sc.extend(sc); all_as.extend(a)
+    """Ejecuta el pipeline de ingesta para todas las ligas configuradas."""
+    all_standings, all_scorers, all_assists = [], [], []
     
-    # Guardar las 3 tablas
-    pd.DataFrame(all_s).to_sql('LeagueStandings', engine, if_exists='replace', index=False)
-    pd.DataFrame(all_sc).to_sql('LeagueScorers', engine, if_exists='replace', index=False)
-    pd.DataFrame(all_as).to_sql('LeagueAssists', engine, if_exists='replace', index=False)
-    print("✅ Las 3 tablas (Posiciones, Goleadores y Asistidores) actualizadas.")
+    for code in LEAGUES.keys():
+        print(f"Extrayendo datos de: {LEAGUES[code]}...")
+        s, sc, a = get_league_data(code)
+        all_standings.extend(s)
+        all_scorers.extend(sc)
+        all_assists.extend(a)
+    
+    # Carga de DataFrames a SQL Server (Reemplaza los datos existentes)
+    pd.DataFrame(all_standings).to_sql('LeagueStandings', engine, if_exists='replace', index=False)
+    pd.DataFrame(all_scorers).to_sql('LeagueScorers', engine, if_exists='replace', index=False)
+    pd.DataFrame(all_assists).to_sql('LeagueAssists', engine, if_exists='replace', index=False)
+    print("✅ Proceso completado: SQL Server actualizado.")
 
 if __name__ == "__main__":
     run_ingesta()

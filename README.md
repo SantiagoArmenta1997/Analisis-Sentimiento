@@ -24,3 +24,19 @@ Este proyecto es un **Pipeline de Datos End-to-End** diseñado para integrar inf
 ├── main.py                 # Orquestador principal del pipeline
 ├── requirements.txt        # Dependencias del proyecto
 └── README.md
+
+## ⚙️ Personalización y Configuración
+
+Para que el proyecto funcione en tu entorno local, debes modificar los siguientes campos en los scripts:
+
+1.  **API Keys:**
+    * En `src/Ingesta.py`: Ingresa tu API Key de NewsAPI.
+    * En `src/Ingesta_Stats.py`: Ingresa tu API Key de Football-Data.org en la variable `API_KEY`.
+
+2.  **Base de Datos (SQL Server):**
+    * Los scripts `src/Ingesta_Stats.py` y `src/app.py` contienen variables `SERVER` y `DATABASE`. 
+    * Por defecto, `SERVER` es `localhost`. Si tu instancia tiene un nombre específico (ej. `SQLEXPRESS`), cámbialo allí.
+    * Asegúrate de tener instalado el **ODBC Driver 17 for SQL Server**.
+
+3.  **Lógica de Negocio:**
+    * Si deseas agregar más ligas, simplemente expande el diccionario `LEAGUES` en los scripts de ingesta y ajusta el mapeo en el dashboard.

@@ -1,39 +1,24 @@
 import subprocess
-import sys
 import os
 
 def ejecutar_script(nombre_script):
-    # 1. Obtener la ruta de la carpeta donde está este main.py
-    directorio_actual = os.path.dirname(os.path.abspath(__file__))
-    
-    # 2. Construir la ruta absoluta hacia el archivo en src
-    ruta_script = os.path.join(directorio_actual, "src", nombre_script)
-    
-    print(f"--- Intentando ejecutar: {ruta_script} ---")
-    
-    if not os.path.exists(ruta_script):
-        print(f"❌ ERROR: El archivo no existe en la ruta: {ruta_script}")
-        return
-
-    try:
-        # Ejecutamos usando el intérprete actual
-        subprocess.run([sys.executable, ruta_script], check=True)
-        print(f"✅ {nombre_script} finalizado con éxito.\n")
-    except subprocess.CalledProcessError as e:
-        print(f"❌ Error al ejecutar {nombre_script}: {e}\n")
-
-# ... (mantén la función ejecutar_script igual) ...
+    """Función para ejecutar scripts de Python localizados en la carpeta /src."""
+    ruta = os.path.join("src", nombre_script)
+    print(f"--- Ejecutando {nombre_script} ---")
+    resultado = subprocess.run(["python", ruta], capture_output=True, text=True)
+    if resultado.returncode == 0:
+        print(f"Éxito: {nombre_script}")
+    else:
+        print(f"Error en {nombre_script}: {resultado.stderr}")
 
 if __name__ == "__main__":
-    print("🏆 INICIANDO PIPELINE DE FÚTBOL COMPLETO ⚽\n")
+    print("🚀 Iniciando Pipeline de Datos Futbolísticos...")
     
-    # 1. Ingesta de noticias (Sentimiento)
+    # 1. Ingesta de noticias y análisis de sentimiento
     ejecutar_script("Ingesta.py")
-    
-    # 2. Ingesta de Estadísticas (Posiciones)
-    ejecutar_script("Ingesta_Stats.py")
-    
-    # 3. Procesamiento de Sentimiento
     ejecutar_script("Procesar.py")
     
-    print("🏁 Todo el sistema está actualizado.")
+    # 2. Ingesta de estadísticas deportivas reales
+    ejecutar_script("Ingesta_Stats.py")
+    
+    print("\n✅ Pipeline completado con éxito. Ejecuta 'streamlit run src/app.py' para ver el dashboard.")
