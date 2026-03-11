@@ -29,17 +29,24 @@ try:
     with c1:
         st.subheader("🏆 Standings (Top 3)")
         if not df_pos.empty:
-            # Limpieza segura de la forma (Last 5 en inglés)
-            df_pos['form'] = (df_pos['form']
-                              .fillna('N/A') # Evita errores si hay nulos
-                              .str.replace(',', '', regex=False)
-                              .str.slice(-5))
+            # Si todos los valores de form son 'N/A' o nulos, definimos las columnas a mostrar
+            columnas_visibles = ['team', 'points', 'gd']
             
-            st.dataframe(df_pos[['team', 'points', 'gd', 'form']], 
-                         hide_index=True,
-                         column_config={"team": "Team", "points": "Pts", "gd": "GD", "form": "Form"})
-        else:
-            st.info("No hay datos de posiciones para esta liga.")
+            # Solo añadimos 'form' si contiene datos distintos a N/A
+            if not (df_pos['form'].isna().all() or (df_pos['form'] == 'N/A').all()):
+                df_pos['form'] = df_pos['form'].str.replace(',', '', regex=False).str.slice(-5)
+                columnas_visibles.append('form')
+            
+            st.dataframe(
+                df_pos[columnas_visibles], 
+                hide_index=True,
+                column_config={
+                    "team": "Team",
+                    "points": "Pts",
+                    "gd": "GD",
+                    "form": "Last 5"
+                }
+            )
 
     with c2:
         st.subheader("🎯 Top Scorers")
